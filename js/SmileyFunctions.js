@@ -1,6 +1,6 @@
 var canvas = {};
-canvas.width = 200;
-canvas.height = 100;
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
 var defRadius = 40;
 var defY = 50;
 var defX = 95;
@@ -45,6 +45,10 @@ function canvasApp() {
 
   function init() {
     numShapes = 10;
+    theCanvas.height = canvas.height;
+    theCanvas.width = canvas.width;
+    context.fillStyle = "#00ccff";
+    context.fillRect(0,0,theCanvas.width,theCanvas.height);
 
     makeShapes();
 
@@ -144,7 +148,8 @@ function canvasApp() {
     var c = document.getElementById("myCanvas");
     if (ctx == null)
       ctx = c.getContext("2d");
-    ctx.clearRect(0, 0, theCanvas.width, theCanvas.height)
+    //ctx.clearRect(0, 0, theCanvas.width, theCanvas.height);
+
     ctx.moveTo(0,0);
     ctx.beginPath();
     ctx.arc(shape.x,shape.y,shape.rad,0,2*Math.PI);
@@ -158,14 +163,14 @@ function canvasApp() {
     ctx.stroke();
     ctx.beginPath();
 
-    ctx.arc(shape.x,shape.y,25,.1*Math.PI,.9*Math.PI)
+    ctx.arc(shape.x,shape.y,25,.1*Math.PI,.9*Math.PI);
     ctx.stroke();
 
   }
 
   function drawScreen() {
     //bg
-    //context.fillRect(0,0,theCanvas.width,theCanvas.height);
+
     //ctx.clearRect(0, 0, canvas.width, canvas.height);
     drawSmiley(context);
   }
