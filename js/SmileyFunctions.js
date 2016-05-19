@@ -46,6 +46,7 @@ function canvasApp() {
   var mouseY;
   var dragHoldX;
   var dragHoldY;
+  var intId;
 
   function init() {
     numShapes = 10;
@@ -56,7 +57,6 @@ function canvasApp() {
     drawScreen();
 
     theCanvas.addEventListener("mousedown", mouseDownListener, false);
-    theCanvas.addEventListener("click", mouseClickListener, false);
   }
 
   function makeShapes() {
@@ -106,6 +106,7 @@ function canvasApp() {
     window.removeEventListener("mouseup", mouseUpListener, false);
     if (dragging) {
       dragging = false;
+      intId = setInterval(update, 1000/60);
       window.removeEventListener("mousemove", mouseMoveListener, false);
     }
   }
@@ -133,14 +134,6 @@ function canvasApp() {
     shape.y = posY;
 
     drawScreen();
-  }
-
-  function mouseClickListener(evt) {
-    if (dragging)
-      return;
-
-
-
   }
 
   function hitTest(shape,mx,my) {
@@ -202,21 +195,18 @@ function canvasApp() {
     //Perfect! Now, lets make it rebound when it touches the floor
     if(shape.y + shape.rad > theCanvas.height) {
       // First, reposition the ball on top of the floor and then bounce it!
+      if (Math.abs(ball.vy) < 1.5) {
+        clearInterval(intId);
+      }
       shape.y = theCanvas.height - shape.rad;
       ball.vy *= -bounceFactor;
       // The bounceFactor variable that we created decides the elasticity or how elastic the collision will be. If it's 1, then the collision will be perfectly elastic. If 0, then it will be inelastic.
     }
   }
 
-  setInterval(update, 1000/60);
+  intId = setInterval(update, 1000/60);
 
-  ///function bounce() {
-  //var c = document.getElementById("myCanvas");
-  //var ctx = c.getContext("2d");
-  //ctx.clearRect(0, 0, canvas.width, canvas.height);
-  //ctx.translate(50, 0);
-  // drawSmiley(ctx);
-//}
+
 }
 
 
