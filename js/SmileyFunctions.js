@@ -39,7 +39,7 @@ function canvasApp() {
   init();
 
   var numShapes;
-  var shape;
+  var shapes;
   var dragIndex;
   var dragging;
   var mouseX;
@@ -47,21 +47,23 @@ function canvasApp() {
   var dragHoldX;
   var dragHoldY;
   var intId;
+  var curShape;
 
   function init() {
-    numShapes = 10;
+    numShapes = 1;
+    shapes = [];
     resizeCanvas();
 
-    makeShapes();
+    makeShape(defX, defY, defRadius);
 
     drawScreen();
 
     theCanvas.addEventListener("mousedown", mouseDownListener, false);
   }
 
-  function makeShapes() {
-    tempShape = {x: defX, y: defY, rad: defRadius};
-    shape = tempShape;
+  function makeShape(in_x, in_y, in_rad) {
+    tempShape = {x: in_x, y: in_y, rad: in_rad, bouncing: true};
+    shapes.push(tempShape);
   }
 
   function mouseDownListener(evt) {
@@ -76,14 +78,21 @@ function canvasApp() {
     mouseY = (evt.clientY - bRect.top)*(theCanvas.height/bRect.height);
 
     //find which shape was clicked
-      if	(hitTest(shape, mouseX, mouseY)) {
+    for (i=0; i < numShapes; i++) {
+      if (hitTest(shapes[i], mouseX, mouseY)) {
         dragging = true;
-          //We will pay attention to the point on the object where the mouse is "holding" the object:
-          dragHoldX = mouseX - shape.x;
-          dragHoldY = mouseY - shape.y;
+        shapes[i].bouncing = false;
+        curShape = shapes[i];
+        //We will pay attention to the point on the object where the mouse is "holding" the object:
+        if (i > highestIndex) {
+          dragHoldX = mouseX - shapes[i].x;
+          dragHoldY = mouseY - shapes[i].y;
           highestIndex = i;
           dragIndex = i;
+        }
+      }
     }
+    
 
     if (dragging) {
       window.addEventListener("mousemove", mouseMoveListener, false);
@@ -106,7 +115,7 @@ function canvasApp() {
     window.removeEventListener("mouseup", mouseUpListener, false);
     if (dragging) {
       dragging = false;
-      intId = setInterval(update, 1000/60);
+      curShape.bouncing = true;
       window.removeEventListener("mousemove", mouseMoveListener, false);
     }
   }
@@ -114,7 +123,7 @@ function canvasApp() {
   function mouseMoveListener(evt) {
     var posX;
     var posY;
-    var shapeRad = shape.rad;
+    var shapeRad = curShape.rad;
     var minX = shapeRad;
     var maxX = theCanvas.width - shapeRad;
     var minY = shapeRad;
@@ -130,8 +139,8 @@ function canvasApp() {
     posY = mouseY - dragHoldY;
     posY = (posY < minY) ? minY : ((posY > maxY) ? maxY : posY);
 
-    shape.x = posX;
-    shape.y = posY;
+    curShape.x = posX;
+    curShape.y = posY;
 
     drawScreen();
   }
@@ -147,27 +156,29 @@ function canvasApp() {
     return (dx*dx + dy*dy < shape.rad*shape.rad);
   }
 
-  function drawSmiley(ctx) {
-    var c = document.getElementById("myCanvas");
-    if (ctx == null)
-      ctx = c.getContext("2d");
-    
+  function drawSmileys(ctx) {
+    for (i=0; i < numShapes; i++) {
+      var c = document.getElementById("myCanvas");
+      if (ctx == null)
+        ctx = c.getContext("2d");
 
-    ctx.moveTo(0,0);
-    ctx.beginPath();
-    ctx.arc(shape.x,shape.y,shape.rad,0,2*Math.PI);
-    ctx.fillStyle = "#ffe066";
-    ctx.fill();
-    ctx.lineWidth = 5;
-    ctx.moveTo(shape.x - 15, shape.y - 30);
-    ctx.lineTo(shape.x - 15, shape.y);
-    ctx.moveTo(shape.x + 15,shape.y - 30);
-    ctx.lineTo(shape.x + 15,shape.y);
-    ctx.stroke();
-    ctx.beginPath();
 
-    ctx.arc(shape.x,shape.y,25,.1*Math.PI,.9*Math.PI);
-    ctx.stroke();
+      ctx.moveTo(0, 0);
+      ctx.beginPath();
+      ctx.arc(shapes[i].x, shapes[i].y, shapes[i].rad, 0, 2 * Math.PI);
+      ctx.fillStyle = "#ffe066";
+      ctx.fill();
+      ctx.lineWidth = 5;
+      ctx.moveTo(shapes[i].x - 15, shapes[i].y - 30);
+      ctx.lineTo(shapes[i].x - 15, shapes[i].y);
+      ctx.moveTo(shapes[i].x + 15, shapes[i].y - 30);
+      ctx.lineTo(shapes[i].x + 15, shapes[i].y);
+      ctx.stroke();
+      ctx.beginPath();
+
+      ctx.arc(shapes[i].x, shapes[i].y, 25, .1 * Math.PI, .9 * Math.PI);
+      ctx.stroke();
+    }
 
   }
 
@@ -176,7 +187,7 @@ function canvasApp() {
     context.clearRect(0, 0, theCanvas.width, theCanvas.height);
     context.fillStyle = "#00ccff";
     context.fillRect(0,0,theCanvas.width,theCanvas.height);
-    drawSmiley(context);
+    drawSmileys(context);
   }
 
   function resizeCanvas(){
@@ -184,7 +195,10 @@ function canvasApp() {
     theCanvas.height = window.innerHeight - 30;
   }
 
-  function update() {
+  function update(shape) {
+    if (shape.bouncing == false)
+      return;
+    
     drawScreen();
 
     // Now, lets make the ball move by adding the velocity vectors to its position
@@ -196,15 +210,29 @@ function canvasApp() {
     if(shape.y + shape.rad > theCanvas.height) {
       // First, reposition the ball on top of the floor and then bounce it!
       if (Math.abs(ball.vy) < 1.5) {
-        clearInterval(intId);
+        shape.bouncing = false;
       }
       shape.y = theCanvas.height - shape.rad;
       ball.vy *= -bounceFactor;
       // The bounceFactor variable that we created decides the elasticity or how elastic the collision will be. If it's 1, then the collision will be perfectly elastic. If 0, then it will be inelastic.
     }
   }
-
-  intId = setInterval(update, 1000/60);
+  
+  function makeMoreShapes() {
+    rand_x = Math.random() * (theCanvas.width);
+    makeShape(rand_x, defY, defRadius);
+    numShapes += 1;
+  }
+  
+  function updateShapes() {
+    var i;
+    for (i = 0; i < numShapes; i++)
+    {
+      update(shapes[i]);
+    }
+  }
+  setInterval(updateShapes, 1000/60);
+  setInterval(makeMoreShapes, 2000);
 
 
 }
