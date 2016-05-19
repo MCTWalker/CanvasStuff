@@ -1,6 +1,3 @@
-var canvas = {};
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
 var defRadius = 40;
 var defY = 50;
 var defX = 95;
@@ -29,8 +26,15 @@ function canvasApp() {
     return;
   }
 
+  ball = {
+    vx: 0,
+    vy: 1,
+  };
+
   var theCanvas = document.getElementById("myCanvas");
   var context = theCanvas.getContext("2d");
+  var gravity = 0.2;
+  var bounceFactor = 0.7;
 
   init();
 
@@ -45,16 +49,14 @@ function canvasApp() {
 
   function init() {
     numShapes = 10;
-    theCanvas.height = canvas.height;
-    theCanvas.width = canvas.width;
-    context.fillStyle = "#00ccff";
-    context.fillRect(0,0,theCanvas.width,theCanvas.height);
+    resizeCanvas();
 
     makeShapes();
 
     drawScreen();
 
     theCanvas.addEventListener("mousedown", mouseDownListener, false);
+    theCanvas.addEventListener("click", mouseClickListener, false);
   }
 
   function makeShapes() {
@@ -133,6 +135,14 @@ function canvasApp() {
     drawScreen();
   }
 
+  function mouseClickListener(evt) {
+    if (dragging)
+      return;
+
+
+
+  }
+
   function hitTest(shape,mx,my) {
 
     var dx;
@@ -148,7 +158,7 @@ function canvasApp() {
     var c = document.getElementById("myCanvas");
     if (ctx == null)
       ctx = c.getContext("2d");
-    //ctx.clearRect(0, 0, theCanvas.width, theCanvas.height);
+    
 
     ctx.moveTo(0,0);
     ctx.beginPath();
@@ -169,19 +179,45 @@ function canvasApp() {
   }
 
   function drawScreen() {
-    //bg
-
-    //ctx.clearRect(0, 0, canvas.width, canvas.height);
+    resizeCanvas();
+    context.clearRect(0, 0, theCanvas.width, theCanvas.height);
+    context.fillStyle = "#00ccff";
+    context.fillRect(0,0,theCanvas.width,theCanvas.height);
     drawSmiley(context);
   }
 
-}
+  function resizeCanvas(){
+    theCanvas.width  = window.innerWidth - 30;
+    theCanvas.height = window.innerHeight - 30;
+  }
 
-///function bounce() {
+  function update() {
+    drawScreen();
+
+    // Now, lets make the ball move by adding the velocity vectors to its position
+    shape.y += ball.vy;
+    // Ohh! The ball is moving!
+    // Lets add some acceleration
+    ball.vy += gravity;
+    //Perfect! Now, lets make it rebound when it touches the floor
+    if(shape.y + shape.rad > theCanvas.height) {
+      // First, reposition the ball on top of the floor and then bounce it!
+      shape.y = theCanvas.height - shape.rad;
+      ball.vy *= -bounceFactor;
+      // The bounceFactor variable that we created decides the elasticity or how elastic the collision will be. If it's 1, then the collision will be perfectly elastic. If 0, then it will be inelastic.
+    }
+  }
+
+  setInterval(update, 1000/60);
+
+  ///function bounce() {
   //var c = document.getElementById("myCanvas");
   //var ctx = c.getContext("2d");
   //ctx.clearRect(0, 0, canvas.width, canvas.height);
   //ctx.translate(50, 0);
- // drawSmiley(ctx);
+  // drawSmiley(ctx);
 //}
+}
+
+
 
