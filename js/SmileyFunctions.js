@@ -26,11 +26,6 @@ function canvasApp() {
     return;
   }
 
-  ball = {
-    vx: 0,
-    vy: 1,
-  };
-
   var theCanvas = document.getElementById("myCanvas");
   var context = theCanvas.getContext("2d");
   var gravity = 0.2;
@@ -46,7 +41,6 @@ function canvasApp() {
   var mouseY;
   var dragHoldX;
   var dragHoldY;
-  var intId;
   var curShape;
 
   function init() {
@@ -62,7 +56,7 @@ function canvasApp() {
   }
 
   function makeShape(in_x, in_y, in_rad) {
-    tempShape = {x: in_x, y: in_y, rad: in_rad, bouncing: true};
+    tempShape = {x: in_x, y: in_y, rad: in_rad, bouncing: true, vy: 1, vx: 0};
     shapes.push(tempShape);
   }
 
@@ -202,18 +196,18 @@ function canvasApp() {
     drawScreen();
 
     // Now, lets make the ball move by adding the velocity vectors to its position
-    shape.y += ball.vy;
+    shape.y += shape.vy;
     // Ohh! The ball is moving!
     // Lets add some acceleration
-    ball.vy += gravity;
+    shape.vy += gravity;
     //Perfect! Now, lets make it rebound when it touches the floor
     if(shape.y + shape.rad > theCanvas.height) {
       // First, reposition the ball on top of the floor and then bounce it!
-      if (Math.abs(ball.vy) < 1.5) {
+      if (Math.abs(shape.vy) < 1.5) {
         shape.bouncing = false;
       }
       shape.y = theCanvas.height - shape.rad;
-      ball.vy *= -bounceFactor;
+      shape.vy *= -bounceFactor;
       // The bounceFactor variable that we created decides the elasticity or how elastic the collision will be. If it's 1, then the collision will be perfectly elastic. If 0, then it will be inelastic.
     }
   }
