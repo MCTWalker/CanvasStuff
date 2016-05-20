@@ -30,6 +30,10 @@ function canvasApp() {
   var context = theCanvas.getContext("2d");
   var gravity = 0.2;
   var bounceFactor = 0.7;
+  var makeShapesID;
+  var updateID;
+  var countDownID;
+  var secsLeft = 30;
 
   init();
 
@@ -74,11 +78,14 @@ function canvasApp() {
     //find which shape was clicked
     for (i=numShapes - 1; i > -1; i--) {
       if (hitTest(shapes[i], mouseX, mouseY)) {
-        shapes[i].caught = true;
+		if (shapes[i].caught == false) {
+			caughtNumber += 1;
+			shapes[i].caught = true;
+		}      
         shapes[i].dragging = true;
         shapes[i].bouncing = false;
         curShape = shapes[i];
-        caughtNumber += 1;
+        
         //We will pay attention to the point on the object where the mouse is "holding" the object:
         if (i > highestIndex) {
           dragHoldX = mouseX - shapes[i].x;
@@ -190,14 +197,22 @@ function canvasApp() {
     context.clearRect(0, 0, theCanvas.width, theCanvas.height);
     context.fillStyle = "#00ccff";
     context.fillRect(0,0,theCanvas.width,theCanvas.height);
+	writeTime(context, theCanvas, secsLeft);
     writeText(context, theCanvas);
     writeNumber(context, theCanvas, caughtNumber);
     drawSmileys(context);
   }
 
   function resizeCanvas(){
-    theCanvas.width  = window.innerWidth - 30;
-    theCanvas.height = window.innerHeight - 30;
+	  
+	if (window.innerWidth < 690)
+		theCanvas.width  = window.innerWidth - 30;
+	else
+		theCanvas.width = 660;
+	if (window.innerHeight < 370)
+		theCanvas.height = window.innerHeight - 30;
+	else
+		theCanvas.height = 340;
   }
 
   function update(shape, index) {
@@ -245,11 +260,23 @@ function canvasApp() {
       update(shapes[i], i);
     }
   }
-  setInterval(updateShapes, 1000/60);
-  setInterval(makeMoreShapes, 500);
+  
+  function stopApp() {
+	  clearInterval(updateID);
+	  clearInterval(makeShapesID);
+	  clearInterval(countDownID);
+	  showEndPage(context, theCanvas, caughtNumber);
+  }
+  
+  function countDown() {
+	if (secsLeft == 0)
+		stopApp();
+	else
+		secsLeft--;
+  }
+  updateID = setInterval(updateShapes, 1000/60);
+  makeShapesID = setInterval(makeMoreShapes, 500);
+  countDownID = setInterval(countDown, 1000);
 
 
 }
-
-
-
