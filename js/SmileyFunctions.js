@@ -72,7 +72,7 @@ function canvasApp() {
     mouseY = (evt.clientY - bRect.top)*(theCanvas.height/bRect.height);
 
     //find which shape was clicked
-    for (i=0; i < numShapes; i++) {
+    for (i=numShapes - 1; i > -1; i--) {
       if (hitTest(shapes[i], mouseX, mouseY)) {
         shapes[i].caught = true;
         shapes[i].dragging = true;
