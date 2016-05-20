@@ -41,6 +41,7 @@ function canvasApp() {
   var dragHoldX;
   var dragHoldY;
   var curShape;
+  var caughtNumber = 0;
 
   function init() {
     numShapes = 1;
@@ -55,7 +56,7 @@ function canvasApp() {
   }
 
   function makeShape(in_x, in_y, in_rad) {
-    tempShape = {x: in_x, y: in_y, rad: in_rad, bouncing: true, vy: 1, vx: 0, dragging: false};
+    tempShape = {x: in_x, y: in_y, rad: in_rad, bouncing: true, vy: 1, vx: 0, dragging: false, caught: false};
     shapes.push(tempShape);
   }
 
@@ -73,9 +74,11 @@ function canvasApp() {
     //find which shape was clicked
     for (i=0; i < numShapes; i++) {
       if (hitTest(shapes[i], mouseX, mouseY)) {
+        shapes[i].caught = true;
         shapes[i].dragging = true;
         shapes[i].bouncing = false;
         curShape = shapes[i];
+        caughtNumber += 1;
         //We will pay attention to the point on the object where the mouse is "holding" the object:
         if (i > highestIndex) {
           dragHoldX = mouseX - shapes[i].x;
@@ -162,7 +165,10 @@ function canvasApp() {
       ctx.moveTo(0, 0);
       ctx.beginPath();
       ctx.arc(shapes[i].x, shapes[i].y, shapes[i].rad, 0, 2 * Math.PI);
-      ctx.fillStyle = "#ffe066";
+      if (shapes[i].caught)
+        ctx.fillStyle = "#73e600";
+      else
+        ctx.fillStyle = "#ffe066";
       ctx.fill();
       ctx.lineWidth = 5;
       ctx.moveTo(shapes[i].x - 15, shapes[i].y - 30);
@@ -183,6 +189,8 @@ function canvasApp() {
     context.clearRect(0, 0, theCanvas.width, theCanvas.height);
     context.fillStyle = "#00ccff";
     context.fillRect(0,0,theCanvas.width,theCanvas.height);
+    writeText(context, theCanvas);
+    writeNumber(context, theCanvas, caughtNumber);
     drawSmileys(context);
   }
 
@@ -210,7 +218,7 @@ function canvasApp() {
     //Perfect! Now, lets make it rebound when it touches the floor
     if(shape.y + shape.rad > theCanvas.height) {
       // First, reposition the ball on top of the floor and then bounce it!
-      if (Math.abs(shape.vy) < 2.5) {
+      if (Math.abs(shape.vy) < 8) {
         shape.bouncing = false;
         shapes.splice(index, 1);
         return;
@@ -237,7 +245,7 @@ function canvasApp() {
     }
   }
   setInterval(updateShapes, 1000/60);
-  setInterval(makeMoreShapes, 1000);
+  setInterval(makeMoreShapes, 500);
 
 
 }
