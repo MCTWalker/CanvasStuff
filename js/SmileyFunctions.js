@@ -36,7 +36,6 @@ function canvasApp() {
   var numShapes;
   var shapes;
   var dragIndex;
-  var dragging;
   var mouseX;
   var mouseY;
   var dragHoldX;
@@ -56,7 +55,7 @@ function canvasApp() {
   }
 
   function makeShape(in_x, in_y, in_rad) {
-    tempShape = {x: in_x, y: in_y, rad: in_rad, bouncing: true, vy: 1, vx: 0};
+    tempShape = {x: in_x, y: in_y, rad: in_rad, bouncing: true, vy: 1, vx: 0, dragging: false};
     shapes.push(tempShape);
   }
 
@@ -74,7 +73,7 @@ function canvasApp() {
     //find which shape was clicked
     for (i=0; i < numShapes; i++) {
       if (hitTest(shapes[i], mouseX, mouseY)) {
-        dragging = true;
+        shapes[i].dragging = true;
         shapes[i].bouncing = false;
         curShape = shapes[i];
         //We will pay attention to the point on the object where the mouse is "holding" the object:
@@ -88,7 +87,7 @@ function canvasApp() {
     }
     
 
-    if (dragging) {
+    if (curShape.dragging) {
       window.addEventListener("mousemove", mouseMoveListener, false);
     }
     theCanvas.removeEventListener("mousedown", mouseDownListener, false);
@@ -107,8 +106,8 @@ function canvasApp() {
   function mouseUpListener(evt) {
     theCanvas.addEventListener("mousedown", mouseDownListener, false);
     window.removeEventListener("mouseup", mouseUpListener, false);
-    if (dragging) {
-      dragging = false;
+    if (curShape.dragging) {
+      curShape.dragging = false;
       curShape.bouncing = true;
       window.removeEventListener("mousemove", mouseMoveListener, false);
     }
@@ -140,6 +139,8 @@ function canvasApp() {
   }
 
   function hitTest(shape,mx,my) {
+    if (shape == null)
+      return false;
 
     var dx;
     var dy;
@@ -155,7 +156,8 @@ function canvasApp() {
       var c = document.getElementById("myCanvas");
       if (ctx == null)
         ctx = c.getContext("2d");
-
+      if (shapes[i] == null)
+        return;
 
       ctx.moveTo(0, 0);
       ctx.beginPath();
@@ -189,9 +191,14 @@ function canvasApp() {
     theCanvas.height = window.innerHeight - 30;
   }
 
-  function update(shape) {
-    if (shape.bouncing == false)
+  function update(shape, index) {
+    if (shape == null)
       return;
+
+    if (shape.bouncing == false)
+    {
+      return;
+    }
     
     drawScreen();
 
@@ -203,8 +210,10 @@ function canvasApp() {
     //Perfect! Now, lets make it rebound when it touches the floor
     if(shape.y + shape.rad > theCanvas.height) {
       // First, reposition the ball on top of the floor and then bounce it!
-      if (Math.abs(shape.vy) < 1.5) {
+      if (Math.abs(shape.vy) < 2.5) {
         shape.bouncing = false;
+        shapes.splice(index, 1);
+        return;
       }
       shape.y = theCanvas.height - shape.rad;
       shape.vy *= -bounceFactor;
@@ -213,6 +222,8 @@ function canvasApp() {
   }
   
   function makeMoreShapes() {
+    if (shapes.length > 20)
+      return;
     rand_x = Math.random() * (theCanvas.width);
     makeShape(rand_x, defY, defRadius);
     numShapes += 1;
@@ -222,11 +233,11 @@ function canvasApp() {
     var i;
     for (i = 0; i < numShapes; i++)
     {
-      update(shapes[i]);
+      update(shapes[i], i);
     }
   }
   setInterval(updateShapes, 1000/60);
-  setInterval(makeMoreShapes, 2000);
+  setInterval(makeMoreShapes, 1000);
 
 
 }
