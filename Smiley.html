@@ -4,11 +4,43 @@
     <script src="js/modernizr-2.0.6.js"></script>
     <script src="js/CollectionFunctions.js"></script>
     <script src="js/SmileyFunctions.js"></script>
+	<style>
+		#myCanvas {
+			margin-left: auto;
+			margin-right: auto;
+			display: block;
+			border: 1px solid lightGrey;
+		}
+		#endScreen {
+		  border: 1px solid lightGrey;
+		  font-family: Comic Sans MS;
+		  font-size: 30px;
+		  text-align: center;
+		  margin-left: auto;
+		  margin-right: auto;
+		  display: block;
+		  color: white;
+		  background-color: #00ccff;
+		}
+		.playAgain {
+		  background-color: white;
+		  font-family: Comic Sans MS;
+		  color: #00ccff;
+		  font-size: 30px;
+		  margin-top: 10%;
+		}
+	</style>
 </head>
 <body>
 
 <canvas id="myCanvas" width="canvas.width" height="canvas.height" style="border:1px solid #d3d3d3;">
     Your browser does not support the HTML5 canvas tag.</canvas>
+	
+<div id="endScreen" style="display: none;">
+    <span id="results"></span>
+	<br/>
+	<button class="playAgain" onclick="startOver()">Play Again</button>
+</div>
 
 
 </body>
