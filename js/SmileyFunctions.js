@@ -86,6 +86,7 @@ function canvasApp() {
           highestIndex = i;
           dragIndex = i;
         }
+        break;
       }
     }
     
